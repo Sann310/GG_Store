@@ -1,3 +1,4 @@
+import React from 'react';
 import Link from 'next/link';
 
 const CartItem = ({ item, onRemove }) => {
@@ -8,8 +9,8 @@ const CartItem = ({ item, onRemove }) => {
         <h2>{item.name}</h2>
         <p>${item.price}</p>
         <p>Quantity: {item.quantity}</p>
-        <Link href={`/product/${item.id}`}>
-          View Details
+        <Link href={`/product/${item.id}`} legacyBehavior>
+          <a>View Details</a>
         </Link>
       </div>
       <button onClick={() => onRemove(item.id)}>Remove</button>

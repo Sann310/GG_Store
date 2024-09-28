@@ -13,9 +13,13 @@ const Cart = () => {
   return (
     <div className="cart">
       <ProductForm onAddProduct={handleAddProduct} />
-      {cartItems.map(item => (
-        <CartItem key={item.id} item={item} onRemove={removeFromCart} />
-      ))}
+      {cartItems && cartItems.length > 0 ? (
+        cartItems.map(item => (
+          <CartItem key={item.id} item={item} onRemove={removeFromCart} />
+        ))
+      ) : (
+        <p>Your cart is empty</p>
+      )}
     </div>
   );
 };

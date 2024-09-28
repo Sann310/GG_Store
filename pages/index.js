@@ -25,6 +25,13 @@ const HomePage = () => {
             Shop Now
           </Link>
         </div>
+        <div className={styles.category}>
+          <h2>Categories</h2>
+          <p>Browse all categories</p>
+          <Link href="/categories" className={styles.button}>
+            View Categories
+          </Link>
+        </div>
       </section>
 
       <section className={styles.featuredProducts}>

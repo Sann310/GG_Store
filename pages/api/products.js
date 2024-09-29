@@ -1,40 +1,69 @@
+import multer from 'multer';
 import connectToDatabase from '../../lib/mongodb';
 import Product from '../../models/Product';
 
-export default async function handler(req, res) {
-  const { method } = req;
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/uploads'); // Directory to save uploaded images
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname); // Filename with timestamp to avoid conflicts
+  }
+});
 
-  // Connect to the database
+const upload = multer({ storage });
+
+export const config = {
+  api: {
+    bodyParser: false, // Disable Next.js body parsing, multer will handle it
+  },
+};
+
+export default async function handler(req, res) {
   await connectToDatabase();
 
-  switch (method) {
+  switch (req.method) {
     case 'GET':
       try {
-        // Fetch all products from the database
         const products = await Product.find({});
-
-        // Format each product's price with Baht symbol (฿)
-        const formattedProducts = products.map(product => {
-          return {
-            ...product._doc,
-            price: `${product.price} ฿`, // Format price with the Baht symbol
-          };
-        });
-
-        // Return the formatted product data
-        res.status(200).json({ success: true, data: formattedProducts });
+        res.status(200).json({ success: true, data: products });
       } catch (error) {
-        res.status(400).json({ success: false, error: 'Failed to fetch products' });
+        res.status(400).json({ success: false, message: 'Failed to fetch products' });
       }
       break;
 
     case 'POST':
-      try {
-        const product = await Product.create(req.body);
-        res.status(201).json({ success: true, data: product });
-      } catch (error) {
-        res.status(400).json({ success: false, error: 'Failed to create product' });
-      }
+      upload.single('image')(req, res, async function (err) {
+        if (err) {
+          console.error('Image upload error:', err);
+          return res.status(400).json({ success: false, message: 'Image upload failed' });
+        }
+
+        try {
+          const { name, price, description, stockQuantity, categoryId } = req.body;
+
+          if (!name || !price || !description || !stockQuantity || !categoryId) {
+            return res.status(400).json({ success: false, message: 'All fields are required' });
+          }
+
+          // Create a new product entry
+          const product = new Product({
+            name,
+            price,
+            description,
+            stockQuantity,
+            categoryId,
+            imageURL: `/uploads/${req.file.filename}` // Save file path for image
+          });
+
+          await product.save();
+          res.status(201).json({ success: true, data: product });
+        } catch (error) {
+          console.error('Product creation error:', error);
+          res.status(400).json({ success: false, message: 'Failed to create product' });
+        }
+      });
       break;
 
     default:

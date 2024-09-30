@@ -19,9 +19,11 @@ export default async function handler(req, res) {
 
     case 'POST':
       try {
+        console.log('requestbody',req.body);
         const product = await Product.create(req.body);
         res.status(201).json({ success: true, data: product });
-      } catch (error) {
+      } catch (error) { 
+        console.error('Failed to Create Product',error);
         res.status(400).json({ success: false, message: 'Failed to create product' });
       }
       break;
@@ -39,18 +41,18 @@ export default async function handler(req, res) {
       }
       break;
 
-    case 'DELETE':
-      try {
-        const { id } = req.query;
-        const deletedProduct = await Product.findByIdAndDelete(id);
-        if (!deletedProduct) {
-          return res.status(404).json({ success: false, message: 'Product not found' });
+      case 'DELETE':
+        try {
+          const { id } = req.query; // This retrieves the ID from the query string
+          const deletedProduct = await Product.findByIdAndDelete(id); // Deletes the product by ID
+          if (!deletedProduct) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+          }
+          res.status(200).json({ success: true, data: deletedProduct });
+        } catch (error) {
+          res.status(400).json({ success: false, message: 'Failed to delete product' });
         }
-        res.status(200).json({ success: true, data: deletedProduct });
-      } catch (error) {
-        res.status(400).json({ success: false, message: 'Failed to delete product' });
-      }
-      break;
+        break;
 
     default:
       res.status(405).json({ success: false, message: 'Method not allowed' });

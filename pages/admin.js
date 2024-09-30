@@ -5,10 +5,9 @@ const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
   const [newProduct, setNewProduct] = useState({
     name: '',
-    price: '',
+    price: '',  // Keep as string for input but convert later
     description: '',
-    stockQuantity: '',
-    categoryId: ''
+    stockQuantity: '',  // Keep as string for input but convert later
   });
 
   useEffect(() => {
@@ -22,7 +21,13 @@ const AdminDashboard = () => {
   // Handler for adding a new product
   const handleAddProduct = async () => {
     try {
-      const response = await axios.post('/api/products', newProduct);
+      const productData = {
+        ...newProduct,
+        price: Number(newProduct.price),  // Convert to number
+        stockQuantity: Number(newProduct.stockQuantity),  // Convert to number
+      };
+
+      const response = await axios.post('/api/products', productData);
       if (response.data.success) {
         setProducts([...products, response.data.data]);
         setNewProduct({
@@ -30,7 +35,6 @@ const AdminDashboard = () => {
           price: '',
           description: '',
           stockQuantity: '',
-          categoryId: ''
         });
         alert('Product added successfully!');
       }
@@ -52,18 +56,21 @@ const AdminDashboard = () => {
   };
 
   // Handler for deleting a product
-  const handleDelete = async (id) => {
+const handleDelete = async (id) => {
+    console.log("Deleting product with ID:", id); // Log the ID for debugging
     try {
       const response = await axios.delete(`/api/products/${id}`);
       if (response.data.success) {
         setProducts(products.filter(product => product._id !== id));
         alert('Product deleted successfully!');
+      } else {
+        alert(response.data.message); // Alert the message if the deletion fails
       }
     } catch (error) {
       console.error('Error deleting product:', error);
+      alert('An error occurred while deleting the product.'); // Alert on error
     }
   };
-
   // Handler for input changes in the new product form
   const handleInputChange = (e) => {
     setNewProduct({
@@ -106,13 +113,6 @@ const AdminDashboard = () => {
           value={newProduct.stockQuantity}
           onChange={handleInputChange}
           placeholder="Stock Quantity"
-        />
-        <input
-          type="text"
-          name="categoryId"
-          value={newProduct.categoryId}
-          onChange={handleInputChange}
-          placeholder="Category ID"
         />
         <button onClick={handleAddProduct} className="add-product-btn">Add Product</button>
       </div>

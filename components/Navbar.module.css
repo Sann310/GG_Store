@@ -1,0 +1,20 @@
+.navbar {
+    background-color: #333;
+    padding: 1rem;
+  }
+  
+  .navLinks {
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .navLinks a {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+  }
+  
+  .navLinks a:hover {
+    background-color: #555;
+    border-radius: 5px;
+  }
